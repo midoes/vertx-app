@@ -34,9 +34,12 @@ public class MainVerticle extends AbstractVerticle {
   public void start() {
     HttpServer server = vertx.createHttpServer();
     Router router = Router.router(vertx);
-    router.get("/api*").handler(this::defaultProcessorForAllAPI);
-    router.get("/api/v1/test").handler(this::getTest);
-    router.route().handler(routingContext -> {
+    Router apiSubRouter = Router.router(vertx);
+    // API routing
+    apiSubRouter.get("/*").handler(this::defaultProcessorForAllAPI);
+    apiSubRouter.get("/v1/test").handler(this::getTest);
+    router.mountSubRouter("/api/", apiSubRouter);
+    apiSubRouter.route().handler(routingContext -> {
       // This handler will be called for every request
       HttpServerResponse response = routingContext.response();
       response.putHeader("content-type", "text/plain");
